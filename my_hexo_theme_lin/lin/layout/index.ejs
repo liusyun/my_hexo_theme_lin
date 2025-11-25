@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Welcome Home | <%= config.title %></title>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Noto+Sans+SC:wght@500;700&display=swap" rel="stylesheet">
+  <%- css('css/index.css') %>
+</head>
+<body>
+  <div class="bg-wrapper">
+    <div class="bg-layer bg-clear"></div>
+    <div class="bg-layer bg-blur"></div>
+    <div class="bg-overlay"></div>
+  </div>
+  
+  <div id="sakura-container"></div>
+  
+  <main class="card" id="card">
+    <h1 id="typewriter-text"></h1> 
+    <br>
+    <h2>歡迎來到 <%= config.author %> 的博客</h2>
+    <br>
+    <a href="<%- url_for('/portal/') %>" class="btn">Enter World</a>
+  </main>
+
+<script>
+    const ANIMATION_DURATION = 2500; 
+    // ... (Parallax, Body event listeners 逻辑不变) ...
+
+    // 樱花生成器 (完整代码)
+    const sakuraContainer = document.getElementById('sakura-container');
+    function createSakura() {
+      const sakura = document.createElement('div');
+      sakura.classList.add('sakura');
+      
+      // 随机尺寸 (5px 到 15px)
+      const size = Math.random() * 10 + 5 + 'px';
+      sakura.style.width = size;
+      sakura.style.height = size;
+      
+      // 随机水平位置
+      sakura.style.left = Math.random() * 100 + 'vw';
+      
+      // 随机动画时长 (4s 到 7s)
+      const duration = Math.random() * 3 + 4 + 's';
+      sakura.style.animationDuration = duration;
+      
+      // 随机颜色 (白色、浅粉、粉色)
+      const colors = ['#fff', '#ffe6e9', '#ffccd5'];
+      sakura.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+      
+      sakuraContainer.appendChild(sakura);
+      
+      // 动画结束后移除元素
+      setTimeout(() => {
+        sakura.remove();
+      }, parseFloat(duration) * 1000);
+    }
+    setInterval(createSakura, 300);
+
+    // [修正] 循环打字机逻辑 (保持不变)
+    const textToType = 'HELLO!!'; 
+    const speed = 150; 
+    const pauseTime = 1500; 
+    let charIndex = 0;
+    
+    function typeWriter() {
+      const h1Element = document.getElementById('typewriter-text');
+      
+      if (!h1Element) return;
+
+      if (charIndex < textToType.length) {
+        h1Element.innerHTML += textToType.charAt(charIndex);
+        charIndex++;
+        setTimeout(typeWriter, speed);
+      } else {
+        setTimeout(resetTypewriter, pauseTime);
+      }
+    }
+    
+    function resetTypewriter() {
+        const h1Element = document.getElementById('typewriter-text');
+        
+        h1Element.innerHTML = '';
+        charIndex = 0;
+        
+        // 关键修正：添加占位符，保持光标的可见空间
+        h1Element.innerHTML = '&nbsp;'; 
+        
+        setTimeout(() => {
+            h1Element.innerHTML = ''; // 清除占位符
+            typeWriter();
+        }, 500); 
+    }
+    
+    document.addEventListener('DOMContentLoaded', typeWriter);
+
+    // [新增] 进度条和卡片动画逻辑 (保持不变)
+    // ... (generateScatterCards, startLoadingTransition 逻辑保持不变) ...
+
+    // 1. 卡片生成函数 (不变)
+    function generateScatterCards() {
+        // ... (卡片生成逻辑不变) ...
+    }
+
+    // 2. 动画启动函数 (不变)
+    function startLoadingTransition() {
+        const overlay = document.getElementById('loading-overlay');
+        const fill = overlay.querySelector('.progress-fill');
+        
+        overlay.classList.add('active');
+        document.querySelector('.btn').disabled = true;
+
+        generateScatterCards();
+
+        fill.style.animation = 'none';
+        void fill.offsetWidth; 
+        fill.style.animation = 'fill-progress 2.5s ease-in-out forwards'; 
+        
+        setTimeout(() => {
+            overlay.classList.add('completed'); 
+            
+            setTimeout(() => {
+                 window.location.href = "<%- url_for('/portal/') %>"; 
+            }, 300);
+
+        }, ANIMATION_DURATION);
+    }
+</script>
+
+
+</body>
+</html>

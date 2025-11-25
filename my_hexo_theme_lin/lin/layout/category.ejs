@@ -1,0 +1,68 @@
+<%
+  // === 1. 定义分类配置 (保持不变，用于头部信息) ===
+  var currentCat = page.category || 'tech';
+  
+  var categoryConfig = {
+    'tech':   { title: 'TECH', subtitle: '代码与技术的狂想曲', img: 'tech.jpg' },
+    'movies': { title: 'MOVIES', subtitle: '光影交错的梦境', img: 'movies.jpg' },
+    'books':  { title: 'BOOKS', subtitle: '字里行间的冒险', img: 'gal.webp' },
+    'games':  { title: 'GAMES', subtitle: '第九艺术的殿堂', img: 'games.jpg' }
+  };
+
+  var configObj = categoryConfig[currentCat] || categoryConfig['tech'];
+  var bgImage = url_for('/images/' + configObj.img);
+%>
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= configObj.title %> | 分区文章</title>
+  
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Noto+Sans+SC:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <%- css('css/category.css') %>
+</head>
+<body>
+  <a href="<%- url_for('/portal/') %>" class="back-btn"><i class="fa-solid fa-arrow-left"></i> BACK HOME</a>
+
+  <header class="hero-section">
+    <div class="hero-bg" id="hero-bg" style="background-image: url('<%= bgImage %>')"></div>
+    <div class="hero-content">
+      <h1 class="hero-title" id="category-title"><%= configObj.title %></h1>
+      <p class="hero-subtitle" id="category-subtitle"><%= configObj.subtitle %></p>
+    </div>
+  </header>
+
+  <main class="container">
+    <div class="post-list" id="post-list-container">
+      <% if (page.posts && page.posts.length > 0) { %>
+        <% page.posts.forEach(function(post, index){ %>
+          <a href="<%- url_for(post.path) %>" class="post-card" style="animation-delay: <%= index * 0.1 %>s">
+            
+            <img src="<%= post.cover || bgImage %>" alt="<%= post.title %>" class="post-img">
+            
+            <div class="post-content">
+              <div class="post-meta">
+                <i class="fa-regular fa-calendar"></i> <%= date(post.date, 'YYYY-MM-DD') %> ·
+                <span class="tag">#<%= page.category.toUpperCase() %></span>
+              </div>
+              <h2 class="post-title"><%= post.title %></h2>
+              <p class="post-excerpt"><%= strip_html(post.content).substring(0, 100) %>...</p>
+              <div class="read-more">阅读全文 <i class="fa-solid fa-arrow-right"></i></div>
+            </div>
+            
+            </a>
+        <% }) %>
+      <% } else { %>
+        <div style="text-align:center; padding:50px; color:#999; font-size:1.2rem;"> 
+          🚧 当前分类 (<%= page.category %>) 暂无文章...
+        </div>
+      <% } %>
+    </div>
+  </main>
+
+  </body>
+</html>

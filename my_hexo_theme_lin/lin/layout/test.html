@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Welcome Home | <%= config.title %></title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Noto+Sans+SC:wght@500;700&display=swap" rel="stylesheet">
+<%- css('css/index.css') %>
+</head>
+<body>
+<div class="bg-wrapper">
+    <div class="bg-layer bg-clear"></div>
+    <div class="bg-layer bg-blur"></div>
+    <div class="bg-overlay"></div>
+</div>
+
+<div id="sakura-container"></div>
+
+<main class="card" id="card">
+    <h1>HELLO!!</h1>
+    <br>
+    <h2>歡迎來到 <%= config.author %> 的博客</h2>
+    <br>
+    <button class="btn" onclick="startLoadingTransition()">Enter World</button> 
+</main>
+
+<div id="loading-overlay">
+    <div id="scatter-container"></div>
+    
+    <div class="progress-area">
+        <div class="progress-bar">
+            <div class="progress-fill"></div>
+        </div>
+        <div class="loading-text" id="loading-text">整理房間中...</div>
+    </div>
+</div>
+
+
+<script>
+    // 动画时长（毫秒），必须匹配 CSS 中的 animation 时长
+    const ANIMATION_DURATION = 2500; 
+
+    // Parallax 和 Sakura 脚本 (保持不变)
+    const card = document.getElementById('card');
+    const body = document.querySelector('body');
+    // 视差效果
+    body.addEventListener('mousemove', (e) => {
+      const x = (window.innerWidth / 2 - e.pageX) / 40;
+      const y = (window.innerHeight / 2 - e.pageY) / 40;
+      card.style.transform = `rotateY(${x}deg) rotateX(${y}deg)`;
+    });
+    body.addEventListener('mouseleave', () => {
+      card.style.transform = `rotateY(0deg) rotateX(0deg)`;
+    });
+    // 樱花生成器 (精简代码)
+    const sakuraContainer = document.getElementById('sakura-container');
+    function createSakura() {
+      const sakura = document.createElement('div');
+      sakura.classList.add('sakura');
+      const size = Math.random() * 10 + 5 + 'px';
+      sakura.style.width = size;
+      sakura.style.height = size;
+      sakura.style.left = Math.random() * 100 + 'vw';
+      const duration = Math.random() * 3 + 4 + 's';
+      sakura.style.animationDuration = duration;
+      const colors = ['#fff', '#ffe6e9', '#ffccd5'];
+      sakura.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+      sakuraContainer.appendChild(sakura);
+      setTimeout(() => {
+        sakura.remove();
+      }, parseFloat(duration) * 1000);
+    }
+    setInterval(createSakura, 300);
+
+    // [新增] 进度条和卡片动画逻辑
+    
+    // 1. 卡片生成函数
+    function generateScatterCards() {
+        const container = document.getElementById('scatter-container');
+        if (!container) return;
+        
+        // 确保清除旧卡片
+        container.innerHTML = ''; 
+
+        // 生成15个左右的凌乱卡片
+        for (let i = 0; i < 15; i++) {
+            const scard = document.createElement('div');
+            scard.classList.add('scatter-card');
+            
+            // 随机设置卡片初始位置和旋转角度 (凌乱状态)
+            const x = Math.random() * (window.innerWidth - 100);
+            const y = Math.random() * (window.innerHeight - 100);
+            const rotation = Math.random() * 180 - 90; // -90deg 到 90deg
+            
+            scard.style.left = `${x}px`;
+            scard.style.top = `${y}px`;
+            // 初始状态应用凌乱的 transform
+            scard.style.transform = `translate(0, 0) rotate(${rotation}deg)`; 
+            scard.style.transitionDelay = `${Math.random() * 0.5}s`; // 错开卡片消失时间
+            
+            container.appendChild(scard);
+        }
+    }
+
+    // 2. 动画启动函数
+    function startLoadingTransition() {
+        const overlay = document.getElementById('loading-overlay');
+        const fill = overlay.querySelector('.progress-fill');
+        
+        // 激活覆盖层，显示进度条
+        overlay.classList.add('active');
+        document.querySelector('.btn').disabled = true;
+
+        // 生成凌乱卡片
+        generateScatterCards();
+
+        // 强制重置进度条动画
+        fill.style.animation = 'none';
+        void fill.offsetWidth; 
+        fill.style.animation = 'fill-progress 2.5s ease-in-out forwards'; 
+        
+        // 延迟跳转 (动画时长 2.5s + 额外的 200ms)
+        setTimeout(() => {
+            // 触发卡片归位/消失动画 (通过添加 completed 类)
+            overlay.classList.add('completed'); 
+            
+            // 短暂延迟后跳转
+            setTimeout(() => {
+                 window.location.href = "<%- url_for('/portal/') %>"; 
+            }, 300);
+
+        }, ANIMATION_DURATION);
+    }
+</script>
+
+</body>
+</html>

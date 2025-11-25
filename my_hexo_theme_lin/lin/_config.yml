@@ -1,0 +1,8 @@
+# boxmoe Theme Configuration
+name: My_blog Custom
+version: 1.0.0
+
+menu:
+  Home: /
+  Portal: /portal/
+  Emotion: /emotion/
